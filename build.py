@@ -1,6 +1,6 @@
 # Builds two versions from src.html:
-#   index.html       -> claude.ai artifact (uses the platform's Claude access)
-#   docs/index.html  -> standalone website for GitHub Pages (uses your own API key)
+#   artifact.html -> claude.ai artifact (uses the platform's Claude access)
+#   index.html    -> standalone website for GitHub Pages (uses your own API key)
 import re,pathlib
 d=pathlib.Path(__file__).parent
 src=(d/"src.html").read_text()
@@ -8,7 +8,7 @@ def js(path): return "<script>"+(d/path).read_text().replace("</script","<\\/scr
 def inline(s): return re.sub(r'<script src="(vendor/[^"]+)"(?: async)?></script>',lambda m:js(m.group(1)),s)
 
 art=inline(src)
-(d/"index.html").write_text(art)
+(d/"artifact.html").write_text(art)
 
 MAIN='<script>\n(function(){\n"use strict";'
 assert src.count(MAIN)==1
@@ -26,6 +26,5 @@ head='''<!doctype html>
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head><body>
 '''
-(d/"docs").mkdir(exist_ok=True)
-(d/"docs"/"index.html").write_text(head+site+"\n</body></html>\n")
-print("index.html",len(art.encode())//1024,"KB · docs/index.html",(d/"docs"/"index.html").stat().st_size//1024,"KB")
+(d/"index.html").write_text(head+site+"\n</body></html>\n")
+print("artifact.html",len(art.encode())//1024,"KB · index.html",(d/"index.html").stat().st_size//1024,"KB")

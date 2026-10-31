@@ -15,6 +15,6 @@ Tuteur IA pour le cycle ingénieur : importe tes cours (PDF, Word, photos), obti
 - `src.html` : le code source de l'application
 - `standalone/shim.js` : connexion à l'API Claude avec ta clé (version site)
 - `vendor/` : bibliothèques intégrées (MathJax, math.js, marked, DOMPurify, SDK Anthropic)
-- `build.py` : génère `docs/index.html` (le site GitHub Pages) et `index.html` (version artifact claude.ai)
+- `build.py` : génère `index.html` (le site GitHub Pages) et `artifact.html` (version artifact claude.ai)
 
 Après une modification de `src.html`, lance `python3 build.py`.
