@@ -1,0 +1,1064 @@
+<title>Prof Ingé</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one-screen app — course/conversation rail on the left (drawer on phones), lab-notebook workspace on the right, composer pinned at the bottom. */
+:root{
+  --paper:#f5f7f4; --sheet:#ffffff; --grid:rgba(36,87,214,.06);
+  --ink:#17222f; --ink-2:#4a5868; --ink-3:#7c8896; --line:#dde3e0;
+  --blue:#2457d6; --blue-soft:#e6edfc; --blue-ink:#ffffff;
+  --mark:#f6e27a; --warn:#a85d00; --warn-soft:#fdf0db; --ok:#1f8a4c; --ok-soft:#e3f4ea; --bad:#c2402f; --bad-soft:#fbe7e3;
+  --code-bg:#eef1ee; --shadow:0 1px 2px rgba(20,30,50,.06),0 6px 24px rgba(20,30,50,.06);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --rail:288px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11151b; --sheet:#171c24; --grid:rgba(120,160,255,.05);
+  --ink:#e6ebf2; --ink-2:#aab4c2; --ink-3:#7d8796; --line:#29313d;
+  --blue:#7ea2ff; --blue-soft:#1d2840; --blue-ink:#0d1320;
+  --mark:#6b5d16; --warn:#f0b45a; --warn-soft:#38290f; --ok:#5fd08f; --ok-soft:#173226; --bad:#ff8a78; --bad-soft:#3a1d19;
+  --code-bg:#1e2530; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11151b; --sheet:#171c24; --grid:rgba(120,160,255,.05);
+  --ink:#e6ebf2; --ink-2:#aab4c2; --ink-3:#7d8796; --line:#29313d;
+  --blue:#7ea2ff; --blue-soft:#1d2840; --blue-ink:#0d1320;
+  --mark:#6b5d16; --warn:#f0b45a; --warn-soft:#38290f; --ok:#5fd08f; --ok-soft:#173226; --bad:#ff8a78; --bad-soft:#3a1d19;
+  --code-bg:#1e2530; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25); color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;overflow:hidden}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.app{display:grid;grid-template-columns:var(--rail) 1fr;height:100%}
+
+/* rail */
+.rail{background:var(--sheet);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding-left:max(0px,env(safe-area-inset-left,0px))}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 12px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--blue);color:var(--blue-ink);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:15px}
+.brand h1{font-family:var(--f-display);font-size:21px;margin:0;letter-spacing:-.01em}
+.brand small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:-2px}
+.rail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 14px 12px}
+.btn{border:1px solid var(--line);background:var(--sheet);border-radius:10px;padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:14.5px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--blue);color:var(--blue-ink);border-color:var(--blue)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--code-bg)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn svg{width:16px;height:16px;flex:none}
+.rail-scroll{overflow-y:auto;flex:1;min-height:0;padding:0 8px 16px}
+.rail-label{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:14px 10px 6px;display:flex;justify-content:space-between;align-items:center}
+.item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:9px;padding:8px 10px;color:var(--ink-2);font-size:14.5px}
+.item:hover{background:var(--code-bg);color:var(--ink)}
+.item.active{background:var(--blue-soft);color:var(--ink)}
+.item .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .tag{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:0 5px;flex:none}
+.item .x{opacity:0;border:0;background:none;color:var(--ink-3);padding:2px;border-radius:5px;display:grid}
+.item:hover .x,.item.active .x{opacity:1}
+.item .x:hover{color:var(--bad)}
+.item .x svg{width:14px;height:14px}
+.empty-note{color:var(--ink-3);font-size:13.5px;padding:4px 10px 8px}
+.rail-foot{border-top:1px solid var(--line);padding:10px 14px;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none}
+.dot.on{background:var(--ok)}
+
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px 16px;border-bottom:1px solid var(--line);background:var(--sheet);flex-wrap:wrap}
+.menu-btn{display:none}
+.ctx{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.ctx-title{font-family:var(--f-display);font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctx-sub{color:var(--ink-3);font-size:13px;white-space:nowrap}
+.seg{display:flex;background:var(--code-bg);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:8px;padding:5px 11px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--sheet);color:var(--ink);box-shadow:var(--shadow)}
+.course-strip{display:flex;gap:6px;padding:8px 16px;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--sheet);scrollbar-width:thin}
+.course-strip[hidden]{display:none!important}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:13.5px;white-space:nowrap;color:var(--ink-2);font-weight:600}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.strong{background:var(--blue-soft);border-color:transparent;color:var(--blue)}
+
+.thread{flex:1;overflow-y:auto;min-height:0;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.col{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.msg{display:flex;flex-direction:column;gap:8px;min-width:0;animation:rise .28s ease-out}
+@keyframes rise{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.user{align-items:flex-end}
+.bubble{min-width:0;max-width:100%}
+.msg.user .bubble{background:var(--blue);color:var(--blue-ink);padding:10px 14px;border-radius:14px 14px 4px 14px;max-width:min(85%,640px);white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.ai .bubble{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow)}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.thumbs img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.who{font-size:12px;color:var(--ink-3);font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;gap:8px;align-items:center}
+.msg-tools{display:flex;gap:4px;flex-wrap:wrap}
+.msg-tools .btn{padding:4px 9px;font-size:12.5px;font-weight:600;border-radius:8px;color:var(--ink-3)}
+.msg-tools .btn:hover{color:var(--ink)}
+.followups{display:flex;gap:6px;flex-wrap:wrap}
+.thinking{color:var(--ink-3);font-style:italic}
+.calc-status{font-size:13px;color:var(--ink-3);font-family:var(--f-mono)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ok);background:var(--ok-soft);border-radius:6px;padding:2px 8px}
+.verify-box{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--blue-soft);border-radius:12px;padding:10px 12px}
+.verify-box p{margin:0;flex:1 1 220px;font-size:14px;color:var(--ink)}
+.err{color:var(--bad);background:var(--bad-soft);padding:8px 12px;border-radius:8px;font-size:14px}
+
+/* markdown */
+.md{overflow-wrap:break-word}
+.md>*:first-child,.md .blk:first-child>*:first-child{margin-top:0}.md>*:last-child,.md .blk:last-child>*:last-child{margin-bottom:0}
+.md .blk{display:contents}
+.toc{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px dashed var(--line)}
+.toc b{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);width:100%}
+.toc button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--ink-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toc button:hover{border-color:var(--blue);color:var(--blue)}
+.md h1,.md h2,.md h3,.md h4{font-family:var(--f-display);line-height:1.25;text-wrap:balance;margin:1.3em 0 .5em}
+.md h1{font-size:1.45em}.md h2{font-size:1.25em;padding-bottom:4px;border-bottom:1px solid var(--line)}.md h3{font-size:1.08em}.md h4{font-size:1em}
+.md p,.md ul,.md ol{margin:.6em 0}
+.md li{margin:.2em 0}
+.md strong{font-weight:700}
+.md code{font-family:var(--f-mono);font-size:.86em;background:var(--code-bg);padding:.1em .35em;border-radius:5px}
+.md pre{background:var(--code-bg);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:14px}
+.md pre code{background:none;padding:0}
+.md blockquote{margin:1em 0;padding:.55em 1em;border-left:3px solid var(--ink-3);background:var(--code-bg);border-radius:0 10px 10px 0}
+.md blockquote>p{margin:.35em 0}
+.md blockquote.c-def{border-color:var(--blue);background:var(--blue-soft)}
+.md blockquote.c-key{border-color:var(--ok);background:var(--ok-soft)}
+.md blockquote.c-warn{border-color:var(--warn);background:var(--warn-soft)}
+.md h2{scroll-margin-top:12px}
+.md table{border-collapse:collapse;font-size:14.5px}
+.md .tbl{overflow-x:auto;margin:.8em 0}
+.md th,.md td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.md th{background:var(--code-bg)}
+.md hr{border:0;border-top:1px dashed var(--line);margin:1.4em 0}
+.md mjx-container[display="true"]{display:block;overflow-x:auto;overflow-y:hidden;max-width:100%;padding:6px 0;margin:.6em 0!important}
+.md mjx-container{max-width:100%}
+.md mark{background:var(--mark);color:inherit;padding:0 .15em;border-radius:3px}
+
+/* welcome */
+.welcome{display:flex;flex-direction:column;gap:18px;padding-top:4vh}
+.welcome h2{font-family:var(--f-display);font-size:clamp(26px,4vw,36px);line-height:1.1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.welcome h2 em{font-style:normal;background:linear-gradient(transparent 62%,var(--mark) 62%)}
+.welcome p.lead{color:var(--ink-2);margin:0;max-width:60ch}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{text-align:left;background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:4px;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--blue);transform:translateY(-1px)}
+.card b{font-size:15px}
+.card span{color:var(--ink-2);font-size:13.5px}
+.card .k{font-family:var(--f-mono);font-size:11px;color:var(--blue);letter-spacing:.06em;text-transform:uppercase}
+.examples-label{font-size:12px;color:var(--ink-3);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+/* composer */
+.composer{padding:8px max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px));position:relative}
+.comp-box{max-width:820px;margin:0 auto;background:var(--sheet);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:6px 6px 6px}
+.comp-box:focus-within{border-color:var(--blue)}
+.comp-box.drag{border-color:var(--blue);background:var(--blue-soft)}
+.attach-row{display:flex;gap:8px;flex-wrap:wrap;padding:6px 6px 4px}
+.attach-row:empty{display:none}
+.att{position:relative}
+.att img{width:58px;height:58px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.att button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:12px;line-height:20px;padding:0}
+.comp-row{display:flex;align-items:flex-end;gap:4px}
+#input{flex:1;min-width:0;border:0;background:none;resize:none;outline:none;padding:9px 6px;max-height:200px;min-height:42px;font-size:16px;line-height:1.45}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:0;background:none;color:var(--ink-2);display:grid;place-items:center;flex:none}
+.icon-btn:hover{background:var(--code-bg);color:var(--ink)}
+.icon-btn svg{width:21px;height:21px}
+.send-btn{width:40px;height:40px;border-radius:12px;border:0;background:var(--blue);color:var(--blue-ink);display:grid;place-items:center;flex:none;transition:transform .12s,filter .15s}
+.send-btn:hover{filter:brightness(1.08)}.send-btn:active{transform:scale(.94)}
+.send-btn svg{width:19px;height:19px}
+.send-btn.stop{background:var(--ink);color:var(--paper)}
+.opt-row{display:flex;gap:6px;flex-wrap:wrap;padding:4px 4px 2px}
+.pill{position:relative;cursor:pointer;user-select:none}
+.pill input{position:absolute;opacity:0;pointer-events:none}
+.pill span{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;color:var(--ink-3);transition:background .15s,color .15s,border-color .15s}
+.pill span::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--line)}
+.pill input:checked+span{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.pill input:checked+span::before{background:var(--blue)}
+.pill input:focus-visible+span{outline:2px solid var(--blue);outline-offset:2px}
+.to-bottom{position:absolute;left:50%;top:-46px;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--sheet);color:var(--ink-2);box-shadow:var(--shadow);display:grid;place-items:center;z-index:5}
+.to-bottom svg{width:18px;height:18px}
+.hint{max-width:820px;margin:6px auto 0;font-size:12px;color:var(--ink-3);text-align:center}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(10,16,24,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.modal{background:var(--sheet);border-radius:16px;width:min(640px,100%);max-height:calc(100% - 20px);overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:22px}
+.modal h3{font-family:var(--f-display);margin:0 0 4px;font-size:22px}
+.modal .sub{color:var(--ink-2);margin:0 0 16px;font-size:14.5px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:13px;font-weight:700;color:var(--ink-2)}
+.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--paper);width:100%}
+.field textarea{min-height:140px;resize:vertical}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--ink-2);background:var(--paper);cursor:pointer}
+.drop:hover,.drop.drag{border-color:var(--blue);color:var(--blue)}
+.drop b{display:block;color:var(--ink);margin-bottom:4px}
+.filelist{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:13.5px}
+.filelist div{display:flex;justify-content:space-between;gap:8px;padding:5px 9px;background:var(--code-bg);border-radius:7px}
+.filelist span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.progress{font-size:13.5px;color:var(--ink-2);margin-right:auto}
+.bar{height:6px;background:var(--code-bg);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--blue);width:0;transition:width .3s}
+
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:18px}
+.q{border:1px solid var(--line);border-radius:12px;padding:14px}
+.q-h{font-weight:700;margin-bottom:8px;display:flex;gap:8px}
+.q-h .n{font-family:var(--f-mono);color:var(--blue);flex:none}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:8px 11px}
+.opt:hover:not(:disabled){border-color:var(--blue)}
+.opt.good{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.expl{margin-top:8px;font-size:14.5px;color:var(--ink-2);background:var(--code-bg);padding:8px 11px;border-radius:8px}
+.score{font-family:var(--f-display);font-size:20px;font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:10px;font-size:14px;z-index:60}
+.scrim{display:none}
+.notice{max-width:820px;margin:0 auto 10px;background:var(--bad-soft);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .rail{position:fixed;inset:0 auto 0 0;width:min(86vw,320px);z-index:40;transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow);padding-top:env(safe-area-inset-top,0px)}
+  .app.open .rail{transform:none}
+  .app.open .scrim{display:block;position:fixed;inset:0;background:rgba(10,16,24,.4);z-index:30}
+  .menu-btn{display:inline-flex}
+  .ctx-sub{display:none}
+  .seg{width:100%}.seg button{flex:1}
+  .cards{grid-template-columns:1fr}
+  .hint{display:none}
+  .msg.ai .bubble{padding:14px 14px;border-radius:12px}
+  .topbar{padding:6px 12px;gap:6px}
+  .ctx-title{font-size:15px}
+  .seg button{padding:5px 6px;font-size:13px}
+  .thread{padding-top:16px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .col{gap:18px}
+  .md{font-size:15.5px}
+  .md .tbl{margin-left:-2px;margin-right:-2px}
+  .md th,.md td{padding:5px 8px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app" id="app">
+  <aside class="rail" id="rail">
+    <div class="brand">
+      <div class="brand-mark">∂x</div>
+      <div><h1>Prof Ingé</h1><small>Tuteur IA · cycle ingénieur</small></div>
+    </div>
+    <div class="rail-actions">
+      <button class="btn primary" id="newChatBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Discussion</button>
+      <button class="btn" id="addCourseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M12 7v6M9 10h6"/></svg>Cours</button>
+    </div>
+    <div class="rail-scroll">
+      <div class="rail-label">Mes cours</div>
+      <div id="courseList"></div>
+      <div class="rail-label">Discussions</div>
+      <div id="chatList"></div>
+    </div>
+    <div class="rail-foot"><span class="dot" id="syncDot"></span><span id="syncText">Connexion…</span></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="btn ghost menu-btn" id="menuBtn" aria-label="Ouvrir le menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="ctx"><span class="ctx-title" id="ctxTitle">Nouvelle discussion</span><span class="ctx-sub" id="ctxSub"></span></div>
+      <div class="seg" id="modeSeg" role="group" aria-label="Mode">
+        <button data-mode="explain" aria-pressed="true">Comprendre</button>
+        <button data-mode="exo" aria-pressed="false">Exercice</button>
+        <button data-mode="revise" aria-pressed="false">Réviser</button>
+      </div>
+    </div>
+    <div class="course-strip" id="courseStrip" hidden></div>
+    <div class="thread" id="thread"><div class="col" id="col"></div></div>
+    <div class="composer">
+      <div id="noticeBox"></div>
+      <button class="to-bottom" id="toBottom" aria-label="Aller à la fin" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+      <div class="comp-box" id="compBox">
+        <div class="attach-row" id="attachRow"></div>
+        <div class="comp-row">
+          <button class="icon-btn" id="photoBtn" title="Joindre une photo" aria-label="Joindre une photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+          <input type="file" id="photoInput" accept="image/*" multiple hidden>
+          <textarea id="input" rows="1" placeholder="Pose ta question, colle un énoncé, ou envoie la photo d'un exercice…"></textarea>
+          <button class="send-btn" id="sendBtn" aria-label="Envoyer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+          <button class="send-btn stop" id="stopBtn" aria-label="Arrêter" hidden><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>
+        </div>
+        <div class="opt-row">
+          <label class="pill" title="Plus lent mais plus rigoureux pour les exercices difficiles"><input type="checkbox" id="deepToggle"><span>Raisonnement poussé</span></label>
+          <label class="pill" id="verifyWrap" title="Avec une photo : l'énoncé et le schéma sont recopiés pour que tu les valides avant la résolution"><input type="checkbox" id="verifyToggle" checked><span>Valider l'énoncé</span></label>
+          <label class="pill" id="calcWrap" title="Les calculs numériques sont faits avec une vraie calculatrice"><input type="checkbox" id="calcToggle" checked><span>Calculatrice</span></label>
+        </div>
+      </div>
+      <div class="hint">Entrée pour envoyer · Maj+Entrée pour aller à la ligne · tu peux coller une image directement</div>
+    </div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true,packages:{'[+]':['ams','boldsymbol','cancel','color','mathtools','physics','braket','mhchem','unicode']}},
+  svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']},
+  startup:{typeset:false,pageReady(){return MathJax.startup.defaultPageReady().then(()=>{window.__mjFlush&&window.__mjFlush()})}}};
+</script>
+<script src="vendor/marked.min.js"></script>
+<script src="vendor/purify.min.js"></script>
+<script src="vendor/math.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="vendor/mathjax-tex-svg-full.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const bytes=s=>new TextEncoder().encode(s).length;
+const ICON_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+/* ---------- example course (built in, never stored) ---------- */
+const EXAMPLE={id:"example",kind:"course",example:true,title:"Exemple · Transformée de Laplace",subject:"Mathématiques pour l'ingénieur",source:"Exemple intégré",
+text:`# Transformée de Laplace (extrait d'exemple)
+
+## Définition
+Pour une fonction causale $f(t)$ (nulle pour $t<0$), on définit $F(p)=\\mathcal{L}[f](p)=\\int_0^{+\\infty} f(t)\\,e^{-pt}\\,dt$, pour $\\mathrm{Re}(p)$ supérieur à l'abscisse de convergence.
+
+## Propriétés
+- Linéarité : $\\mathcal{L}[af+bg]=aF+bG$
+- Dérivation : $\\mathcal{L}[f'](p)=pF(p)-f(0^+)$
+- Intégration : $\\mathcal{L}\\left[\\int_0^t f\\right]=F(p)/p$
+- Retard : $\\mathcal{L}[f(t-\\tau)u(t-\\tau)]=e^{-\\tau p}F(p)$
+- Valeur finale : $\\lim_{t\\to\\infty}f(t)=\\lim_{p\\to0}pF(p)$ (si les pôles de $pF$ sont à partie réelle négative)
+
+## Table usuelle
+$\\mathcal{L}[u(t)]=1/p$, $\\mathcal{L}[t^n]=n!/p^{n+1}$, $\\mathcal{L}[e^{-at}]=1/(p+a)$, $\\mathcal{L}[\\sin\\omega t]=\\omega/(p^2+\\omega^2)$.
+
+## Application : circuit RC
+Équation $RC\\,s'(t)+s(t)=e(t)$, d'où la fonction de transfert $H(p)=\\dfrac{1}{1+RCp}$. Réponse indicielle : $s(t)=E(1-e^{-t/RC})$.`};
+
+/* ---------- state ---------- */
+const IMGS={};
+const S={courses:[],chats:[],chatId:null,courseId:null,mode:"explain",pending:[],busy:false,ctl:null,
+  sample:null,limits:null,store:null,showExample:true};
+
+/* ---------- storage: private db, fallback localStorage ---------- */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+const writeChains={};
+const Store={
+  mode:"local",col:null,
+  async init(){
+    setSync(false,"Connexion…");
+    const local=LS.get("profinge_items",[]);
+    applyItems(local);
+    let db=null,user=null;
+    try{[db,user]=await Promise.all([window.claude?.use("db"),window.claude?.use("user")])}catch(e){}
+    let id=null;
+    if(db&&user){try{id=await user.id()}catch(e){}}
+    if(!db||!id){this.mode="local";setSync(false,"Sauvegarde sur cet appareil");return}
+    this.mode="db";this.col=db.collection("data/users/"+id);
+    let first=true;
+    const timer=setTimeout(()=>{if(first)setSync(false,"Synchronisation lente…")},10000);
+    this.col.onSnapshot(snap=>{
+      const items=snap.docs.map(d=>({...d.data(),id:d.id}));
+      if(!snap.metadata||!snap.metadata.fromCache){clearTimeout(timer);first=false;setSync(true,"Synchronisé sur ton compte")}
+      if(first&&items.length===0&&local.length){/* migrate local items once */ local.forEach(it=>this.save(it))}
+      applyItems(items);
+    },err=>{clearTimeout(timer);this.mode="local";setSync(false,"Hors ligne · sauvegarde locale");});
+  },
+  save(item){
+    const {id,...data}=item;
+    if(this.mode==="db"){
+      const run=()=>this.col.doc(id).set(data).catch(e=>toast(e&&e.code==="quota_exceeded"?"Stockage plein : supprime d'anciennes discussions.":"Sauvegarde impossible pour l'instant."));
+      writeChains[id]=(writeChains[id]||Promise.resolve()).then(run);
+    }else{
+      const all=LS.get("profinge_items",[]).filter(x=>x.id!==id);all.push(item);
+      if(!LS.set("profinge_items",all))toast("Mémoire locale pleine : supprime d'anciens cours.");
+    }
+  },
+  remove(id){
+    if(this.mode==="db"){writeChains[id]=(writeChains[id]||Promise.resolve()).then(()=>this.col.doc(id).delete().catch(()=>{}))}
+    else LS.set("profinge_items",LS.get("profinge_items",[]).filter(x=>x.id!==id));
+  }
+};
+function applyItems(items){
+  const byId=new Map();
+  // keep in-memory versions of chats being streamed
+  items.forEach(i=>byId.set(i.id,i));
+  S.chats.forEach(c=>{if(c._live)byId.set(c.id,c)});
+  const all=[...byId.values()];
+  S.courses=all.filter(i=>i.kind==="course").sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  S.chats=all.filter(i=>i.kind==="chat").sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  renderRail();
+  if(S.chatId&&!S.busy){const c=getChat();if(c&&sigOf(c)!==S.sig)renderThread();}
+}
+function setSync(on,txt){$("#syncDot").classList.toggle("on",on);$("#syncText").textContent=txt}
+
+const getCourse=id=>id==="example"?EXAMPLE:S.courses.find(c=>c.id===id);
+const getChat=()=>S.chats.find(c=>c.id===S.chatId);
+const allCourses=()=>S.courses.length?S.courses:[EXAMPLE];
+
+/* ---------- markdown + math ---------- */
+marked.setOptions({gfm:true,breaks:false});
+function renderMD(src){
+  const math=[];
+  let s=src.replace(/```[\s\S]*?```|`[^`\n]*`/g,m=>{math.push({code:m});return "@@MJ"+(math.length-1)+"JM@@"});
+  s=s.replace(/\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|(?<![\\$\w])\$(?!\s)[^$\n]+?(?<!\s)\$(?!\d)/g,m=>{math.push({tex:m});return "@@MJ"+(math.length-1)+"JM@@"});
+  s=s.replace(/@@MJ(\d+)JM@@/g,(m,i)=>math[i].code!==undefined?math[i].code:m);
+  let html=marked.parse(s);
+  html=DOMPurify.sanitize(html,{ADD_TAGS:["mark"]});
+  html=html.replace(/@@MJ(\d+)JM@@/g,(m,i)=>esc(math[i].tex));
+  html=html.replace(/<table>/g,'<div class="tbl"><table>').replace(/<\/table>/g,"</table></div>");
+  return html;
+}
+const mjOK=()=>!!(window.MathJax&&typeof MathJax.typesetPromise==="function");
+const mjQueue=new Set();let mjChain=Promise.resolve();
+function typeset(el){
+  if(!el)return;
+  if(!mjOK()){mjQueue.add(el);return}
+  mjChain=mjChain.then(()=>{if(!el.isConnected)return;if(MathJax.typesetClear)MathJax.typesetClear([el]);return MathJax.typesetPromise([el]).then(()=>fitMath(el))}).catch(()=>{});
+}
+// Shrink display equations that are slightly too wide for the screen; wider ones scroll.
+function fitMath(el){
+  el.querySelectorAll('mjx-container[display="true"]').forEach(c=>{
+    const svg=c.querySelector("svg");if(!svg)return;
+    const w=svg.getBoundingClientRect().width,W=c.clientWidth;
+    if(w>W&&W>0&&W/w>.55){svg.style.width=(W-2)+"px";svg.style.height="auto"}
+  });
+}
+window.__mjFlush=()=>{const q=[...mjQueue];mjQueue.clear();q.forEach(typeset)};
+setTimeout(()=>{if(mjOK())window.__mjFlush()},0);
+// Split markdown into top-level blocks so finished blocks are rendered once while text streams.
+function splitBlocks(src){
+  const lines=src.split("\n");const out=[];let cur=[];let fence=false,dmath=false;
+  for(const ln of lines){
+    const t=ln.trim();
+    if(/^(```|~~~)/.test(t))fence=!fence;
+    else if(!fence){const n=(ln.match(/\$\$/g)||[]).length;if(n%2)dmath=!dmath}
+    if(!fence&&!dmath&&t===""){if(cur.length){out.push(cur.join("\n"));cur=[]}}
+    else cur.push(ln);
+  }
+  if(cur.length)out.push(cur.join("\n"));
+  const merged=[];const li=/^\s*([-*+]|\d+[.)])\s/;
+  out.forEach(b=>{const p=merged[merged.length-1];
+    if(p&&(/^[ \t]/.test(b)||(li.test(b)&&li.test(p.split("\n")[0]))))merged[merged.length-1]=p+"\n\n"+b;else merged.push(b)});
+  return merged;
+}
+function decorate(el){
+  el.querySelectorAll("blockquote").forEach(q=>{
+    const k=(q.querySelector("strong")||{}).textContent||"";
+    q.classList.add(/attention|piège|erreur|danger|remarque/i.test(k)?"c-warn":/retenir|résultat|résumé|conclusion|astuce/i.test(k)?"c-key":"c-def");
+  });
+}
+function paintBlocks(md,src,final){
+  const blocks=splitBlocks(src||"");
+  md.querySelectorAll(":scope>:not(.blk)").forEach(e=>e.remove());
+  const kids=[...md.children];
+  blocks.forEach((b,i)=>{
+    let el=kids[i];
+    if(!el){el=document.createElement("div");el.className="blk";md.appendChild(el)}
+    const done=final||i<blocks.length-1;
+    if(el._src!==b){el._src=b;el.innerHTML=renderMD(b);decorate(el);el._ts=false}
+    if(done&&!el._ts){el._ts=true;typeset(el)}
+  });
+  kids.slice(blocks.length).forEach(e=>e.remove());
+}
+/* ---------- prompts ---------- */
+const MODES={
+  explain:{label:"Comprendre",ph:"Pose ta question sur un cours…",
+    rules:`MODE : COMPRENDRE UN COURS.
+- Commence par l'intuition (à quoi ça sert, image mentale), puis les définitions précises, les théorèmes/propriétés (avec hypothèses), et les démonstrations ou justifications utiles.
+- Donne au moins un exemple numérique entièrement déroulé et une application concrète en ingénierie.
+- Signale les pièges et erreurs fréquentes.
+- Termine par un résumé court (3 à 6 points) et une question de vérification pour l'étudiant.`},
+  exo:{label:"Exercice",ph:"Énoncé ou photo de l'exercice…",
+    rules:`MODE : RÉSOUDRE UN EXERCICE.
+- Si une image est fournie, recopie d'abord l'énoncé fidèlement (section "Énoncé"), formules en LaTeX. Si un passage est illisible, dis-le et fais l'hypothèse la plus raisonnable.
+- Sections : **Énoncé**, **Ce qu'on cherche & notions mobilisées**, **Méthode**, **Résolution détaillée** (étape par étape, chaque calcul justifié, aucune étape sautée), **Vérification** (unités, cas limites, ordre de grandeur, ou substitution), **Résultat** (mis en évidence), **À retenir** (la technique réutilisable).
+- Pour plusieurs questions, traite-les toutes dans l'ordre.
+- Calcule avec soin ; vérifie chaque résultat numérique avant de l'écrire.`},
+  revise:{label:"Réviser",ph:"Fiche, exercices, interrogation…",
+    rules:`MODE : RÉVISION.
+- Produis des supports de révision efficaces : fiches synthétiques, formulaires, méthodes types, exercices d'entraînement avec corrigés, questions de cours.
+- Pour des exercices d'entraînement : donne d'abord les énoncés, puis les corrigés détaillés dans une section séparée "Corrigés".
+- Hiérarchise : l'essentiel d'abord.`}
+};
+function systemBlock(course,flags={}){
+  let s=`Tu es « Prof Ingé », un professeur particulier excellent et patient pour un étudiant en cycle ingénieur (école d'ingénieur française, niveau L3/M1). Tu maîtrises les mathématiques, la physique, la mécanique, l'électronique, l'automatique, le traitement du signal, l'informatique, la chimie, l'économie, la gestion de projet et toutes les matières d'école d'ingénieur.
+
+RÈGLES DE FORME :
+- Réponds en français, avec un ton clair et direct.
+- Structure claire : titres ## pour les grandes parties (### pour les sous-parties), paragraphes courts (3-4 lignes max), listes pour les énumérations, **gras** pour les mots-clés, tableaux pour les comparaisons et les applications numériques.
+- Encadrés pour les points importants, sous forme de citation Markdown commençant par un mot-clé en gras :
+  > **Définition** — …   > **Théorème** — …   > **Méthode** — …   > **À retenir** — …   > **Attention** — …
+- Toutes les maths en LaTeX : $...$ en ligne, $$...$$ en bloc (sur des lignes séparées). Pas d'autres délimiteurs. Les unités dans \\mathrm{} ou en texte après la formule. Les résultats finaux dans $$\\boxed{…}$$.
+- Ne mets jamais de symbole $ isolé pour autre chose que des maths.
+- Le code dans des blocs \`\`\` avec le langage.
+- Pas de remplissage ni de formules de politesse.
+
+${MODES[S.mode].rules}
+${flags.calc?`
+CALCULATRICE : tu disposes de l'outil \`calculer\` (math.js). Utilise-le pour TOUS les calculs numériques non triviaux (applications numériques, nombres complexes, modules et arguments, systèmes linéaires, puissances, conversions d'unités). Regroupe un maximum d'expressions dans un seul appel, en définissant des variables (ex. "R1=1e3", "w=2*pi*50", "Z=R1+i*w*0.1", "abs(Z)", "arg(Z)*180/pi"). L'unité imaginaire s'écrit i. Pour un système : lsolve([[a,b],[c,d]],[e,f]). Reporte dans ta réponse les valeurs renvoyées par l'outil, jamais des valeurs calculées de tête. Ne mentionne pas l'outil dans la réponse, présente simplement les calculs.`:""}
+${flags.afterVerify?`
+L'énoncé et le schéma ont été validés (ou corrigés) par l'étudiant dans les messages précédents : base-toi sur la description validée, en appliquant ses corrections.`:""}
+`;
+  if(course){
+    if(course.text&&course.text.trim()){
+      s+=`\nCOURS DE RÉFÉRENCE DE L'ÉTUDIANT — « ${course.title} »${course.subject?" ("+course.subject+")":""}.
+Base-toi en priorité sur ce cours : reprends ses notations, ses définitions et son niveau. Si tu complètes avec tes connaissances, précise-le. Si la question sort du cours, réponds quand même.
+<cours>
+${course.text}
+</cours>
+`;
+    }else{
+      s+=`\nL'étudiant travaille sur le cours « ${course.title} »${course.subject?" ("+course.subject+")":""}${course.notes?". Précisions : "+course.notes:""}. Il n'a pas fourni le support : appuie-toi sur le programme standard d'école d'ingénieur pour ce sujet.\n`;
+    }
+  }
+  return s;
+}
+const LIMIT=240000;
+function buildTurns(chat,course,extraUser,flags={}){
+  let sys=systemBlock(course,flags);
+  let msgs=chat.messages.filter(m=>m.content&&m.content.trim()).map(m=>({role:m.role,content:m.content+(m.imgs?`\n\n[${m.imgs} image(s) étaient jointes à ce message]`:"")}));
+  if(extraUser)msgs.push({role:"user",content:extraUser});
+  // merge consecutive same-role turns
+  const merged=[];msgs.forEach(m=>{const l=merged[merged.length-1];if(l&&l.role===m.role)l.content+="\n\n"+m.content;else merged.push({...m})});
+  while(merged.length&&merged[0].role!=="user")merged.shift();
+  const size=()=>bytes(sys)+merged.reduce((a,m)=>a+bytes(m.content),0);
+  while(size()>LIMIT&&merged.length>2){merged.splice(1,2)}
+  if(size()>LIMIT&&course&&course.text){
+    const over=size()-LIMIT+2000;const keep=Math.max(5000,course.text.length-over);
+    sys=systemBlock({...course,text:course.text.slice(0,keep)+"\n[… suite du cours tronquée pour la longueur …]"},flags);
+  }
+  merged[0]={role:"user",content:sys+"\n\n=== MESSAGE DE L'ÉTUDIANT ===\n"+merged[0].content};
+  return merged;
+}
+
+/* ---------- Claude ---------- */
+async function getSample(){
+  if(S.sample)return S.sample;
+  try{S.sample=await window.claude?.use("sample")}catch(e){S.sample=null}
+  if(S.sample){try{S.limits=await S.sample.limits()}catch(e){S.limits=null}}
+  return S.sample;
+}
+function errText(e){
+  if(e&&e.userMessage)return e.userMessage;
+  const c=e&&e.code;
+  return ({not_granted:"Tu n'as pas autorisé cette page à utiliser Claude. Recharge la page pour qu'on te le redemande, ou active-le dans le menu Autorisations de l'artifact.",
+    sampling_disabled:"Claude n'est pas disponible pour ce compte.",rate_limited:"Limite d'utilisation atteinte pour le moment. Réessaie dans quelques minutes.",
+    session_expired:"Ta session a expiré : reconnecte-toi à claude.ai.",image_rejected:"Image refusée (format ou taille). Essaie une autre photo, en JPEG ou PNG.",
+    images_unavailable:"L'envoi d'images n'est pas disponible ici. Recopie l'énoncé en texte.",prompt_too_large:"Le contenu est trop long. Découpe le cours ou pose une question plus ciblée.",
+    refused:"Claude a refusé cette demande. Reformule-la.",empty_completion:"Réponse vide. Reformule ou simplifie la demande."})[c]||"La connexion a été interrompue. Clique sur « Régénérer » pour réessayer.";
+}
+
+/* ---------- calculator tool ---------- */
+function fmtVal(v){
+  if(v===undefined||v===null)return "";
+  if(typeof v==="function")return "fonction définie";
+  const t=math.typeOf(v);
+  if(t==="ResultSet")return v.entries.map(fmtVal).join(" ; ");
+  if(t==="Complex"){
+    const r=math.abs(v),a=math.arg(v);
+    return math.format(v,{precision:8})+"  [module "+math.format(r,{precision:8})+", argument "+math.format(a,{precision:6})+" rad = "+math.format(a*180/Math.PI,{precision:6})+"°]";
+  }
+  return math.format(v,{precision:10});
+}
+function calcTool(onUse){
+  const scope={};
+  return {name:"calculer",
+    description:"Calculatrice scientifique exacte (math.js). Évalue une liste d'expressions dans l'ordre avec des variables partagées entre les appels (ex. 'R=1e3', 'Z=R+i*2*pi*50*0.1', 'abs(Z)'). Gère complexes (i), unités ('2 kohm * 3 mA to V'), matrices, lsolve, det, inv, derivative, simplify. Renvoie le résultat ou l'erreur de chaque expression.",
+    inputSchema:{type:"object",properties:{expressions:{type:"array",items:{type:"string"},description:"Expressions math.js à évaluer dans l'ordre"}},required:["expressions"]},
+    execute(input){
+      let ex=input&&input.expressions;ex=Array.isArray(ex)?ex.map(String):[String(ex||"")];
+      ex=ex.filter(e=>e.trim()).slice(0,80);
+      if(!ex.length)throw new Error("Aucune expression fournie.");
+      const out=ex.map(e=>{try{return {expr:e,result:fmtVal(math.evaluate(e,scope))}}catch(err){return {expr:e,error:String(err&&err.message||err)}}});
+      onUse(ex.length);
+      return out;
+    }};
+}
+
+/* ---------- rendering ---------- */
+function renderRail(){
+  const cl=$("#courseList");cl.innerHTML="";
+  allCourses().forEach(c=>{
+    const b=document.createElement("button");b.className="item"+(S.courseId===c.id?" active":"");
+    b.innerHTML=`<span class="t">${esc(c.title)}</span>${c.example?'<span class="tag">exemple</span>':`<span class="tag">${c.text?Math.max(1,Math.round(c.text.length/1000))+"k":"sujet"}</span>`}${c.example?"":`<span class="x" role="button" aria-label="Supprimer">${ICON_X}</span>`}`;
+    b.onclick=e=>{if(e.target.closest(".x")){confirmBox(`Supprimer le cours « ${c.title} » ?`,()=>{Store.remove(c.id);S.courses=S.courses.filter(x=>x.id!==c.id);if(S.courseId===c.id)S.courseId=null;renderRail();renderTop()});return}
+      openCourse(c.id)};
+    cl.appendChild(b);
+  });
+  const ch=$("#chatList");ch.innerHTML="";
+  if(!S.chats.length)ch.innerHTML='<div class="empty-note">Tes discussions apparaîtront ici.</div>';
+  S.chats.forEach(c=>{
+    const b=document.createElement("button");b.className="item"+(S.chatId===c.id?" active":"");
+    b.innerHTML=`<span class="t">${esc(c.title||"Discussion")}</span><span class="x" role="button" aria-label="Supprimer">${ICON_X}</span>`;
+    b.onclick=e=>{if(e.target.closest(".x")){confirmBox("Supprimer cette discussion ?",()=>{Store.remove(c.id);S.chats=S.chats.filter(x=>x.id!==c.id);if(S.chatId===c.id)newChat();renderRail()});return}
+      openChat(c.id)};
+    ch.appendChild(b);
+  });
+}
+function renderTop(){
+  const course=S.courseId?getCourse(S.courseId):null;const chat=getChat();
+  $("#ctxTitle").textContent=chat?chat.title:(course?course.title:"Nouvelle discussion");
+  $("#ctxSub").textContent=course?("· cours : "+course.title):"· sans cours lié";
+  if(chat&&course)$("#ctxTitle").textContent=chat.title;
+  document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===S.mode));
+  $("#input").placeholder=MODES[S.mode].ph;
+  $("#verifyWrap").hidden=S.mode!=="exo";
+  $("#calcWrap").hidden=S.mode==="explain";
+  const strip=$("#courseStrip");
+  if(course){
+    strip.hidden=false;
+    strip.innerHTML="";
+    const acts=[["Explique tout le cours","full"],["Plan & notions clés","plan"],["Fiche de révision","fiche"],["Formulaire","formules"],["Exercices corrigés","exos"],["QCM interactif","quiz"],["Pièges classiques","pieges"],["Retirer le cours","detach"]];
+    acts.forEach(([l,k],i)=>{const b=document.createElement("button");b.className="chip"+(i===0||k==="quiz"?" strong":"");b.textContent=l;b.onclick=()=>courseAction(k);strip.appendChild(b)});
+  }else strip.hidden=true;
+}
+function bubbleAI(m,idx,isLast){
+  const w=document.createElement("div");w.className="msg ai";
+  w.innerHTML=`<div class="who">Prof Ingé</div><div class="bubble"><div class="md"></div></div>`;
+  const md=w.querySelector(".md");
+  if(m.error&&!m.content){md.innerHTML=`<div class="err">${esc(m.error)}</div>`}
+  else{
+    paintBlocks(md,m.content||"",true);
+    if(m.error)w.querySelector(".bubble").insertAdjacentHTML("beforeend",`<div class="err" style="margin-top:10px">${esc(m.error)}</div>`);
+    const hs=[...md.querySelectorAll("h2")];
+    if(hs.length>=3){const toc=document.createElement("nav");toc.className="toc";toc.innerHTML="<b>Sommaire</b>";
+      hs.forEach(h=>{const b=document.createElement("button");b.textContent=h.textContent;b.onclick=()=>h.scrollIntoView({behavior:"smooth",block:"start"});toc.appendChild(b)});
+      md.before(toc)}
+  }
+  const tools=document.createElement("div");tools.className="msg-tools";
+  const cp=document.createElement("button");cp.className="btn ghost";cp.textContent="Copier";cp.onclick=()=>copy(m.content||"");tools.appendChild(cp);
+  if(isLast){const rg=document.createElement("button");rg.className="btn ghost regen";rg.textContent="Régénérer";rg.onclick=regenerate;tools.appendChild(rg)}
+  w.appendChild(tools);
+  if(m.calcs){const bd=document.createElement("div");bd.innerHTML=`<span class="badge">Calculs faits à la calculatrice (${m.calcs})</span>`;w.insertBefore(bd,tools)}
+  if(isLast&&m.content&&!S.busy&&m.verify){
+    const v=document.createElement("div");v.className="verify-box";
+    v.innerHTML=`<p>Vérifie l'énoncé et le schéma ci-dessus. S'il y a une erreur, écris la correction dans la zone de message.</p>`;
+    const ok=document.createElement("button");ok.className="btn primary";ok.textContent="C'est correct, résous";ok.onclick=()=>send("C'est correct. Résous maintenant l'exercice complet.",{display:"C'est correct, résous l'exercice."});
+    const ko=document.createElement("button");ko.className="btn";ko.textContent="Corriger";ko.onclick=()=>{const t=$("#input");t.placeholder="Ex : R2 est en parallèle avec C, pas en série ; E = 24 V…";t.focus()};
+    v.append(ok,ko);w.appendChild(v);return w;
+  }
+  if(isLast&&m.content&&!S.busy){
+    const f=document.createElement("div");f.className="followups";
+    const fu=S.mode==="exo"?["Explique l'étape la plus difficile","Donne-moi un exercice similaire","Autre méthode de résolution","Quelles notions de cours revoir ?"]
+      :S.mode==="revise"?["Continue","Plus d'exercices","Interroge-moi","Version encore plus courte"]
+      :["Continue","Plus d'exemples","Explique plus simplement","Donne-moi un exercice d'application"];
+    fu.forEach(t=>{const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=()=>send(t);f.appendChild(b)});
+    w.appendChild(f);
+  }
+  return w;
+}
+function bubbleUser(m){
+  const w=document.createElement("div");w.className="msg user";
+  if(m.thumbs&&m.thumbs.length){const t=document.createElement("div");t.className="thumbs";m.thumbs.forEach(u=>{const i=new Image();i.src=u;i.alt="Image jointe";t.appendChild(i)});w.appendChild(t)}
+  else if(m.imgs){const t=document.createElement("div");t.className="who";t.textContent=m.imgs+" image(s) jointe(s)";w.appendChild(t)}
+  const b=document.createElement("div");b.className="bubble";b.textContent=m.display||m.content;w.appendChild(b);
+  return w;
+}
+const sigOf=c=>c?c.id+":"+c.messages.length+":"+((c.messages[c.messages.length-1]||{}).content||"").length:"";
+function prepThread(){$("#col").querySelectorAll(".followups,.verify-box,.regen").forEach(e=>e.remove())}
+function renderThread(){
+  const col=$("#col");col.innerHTML="";
+  const chat=getChat();
+  if(!chat||!chat.messages.length){col.appendChild(welcome());return}
+  const lastAI=chat.messages.map(m=>m.role).lastIndexOf("assistant");
+  chat.messages.forEach((m,i)=>col.appendChild(m.role==="user"?bubbleUser(m):bubbleAI(m,i,i===lastAI&&i===chat.messages.length-1)));
+  S.sig=sigOf(chat);
+  scrollDown();
+}
+function welcome(){
+  const course=S.courseId?getCourse(S.courseId):null;
+  const w=document.createElement("div");w.className="welcome";
+  if(course){
+    w.innerHTML=`<h2>On travaille <em>${esc(course.title)}</em>.</h2><p class="lead">${course.example?"Ceci est un cours d'exemple pour te montrer le fonctionnement. Ajoute tes propres cours avec le bouton « Cours ». ":""}Choisis une action au-dessus, ou pose directement ta question. Mes réponses s'appuient sur ${course.text?"le contenu de ce cours":"le programme standard de ce sujet"}.</p>`;
+    const g=document.createElement("div");g.className="cards";
+    [["Comprendre","Explique tout le cours","Section par section, avec intuition, exemples et applications.","full"],
+     ["Réviser","QCM interactif","10 questions corrigées pour tester ta compréhension.","quiz"],
+     ["Réviser","Exercices corrigés","Exercices de difficulté croissante, corrigés détaillés.","exos"],
+     ["Réviser","Fiche de révision","L'essentiel du cours sur une page.","fiche"]].forEach(([k,t,d,a])=>{
+      const b=document.createElement("button");b.className="card";b.innerHTML=`<span class="k">${k}</span><b>${t}</b><span>${d}</span>`;b.onclick=()=>courseAction(a);g.appendChild(b)});
+    w.appendChild(g);return w;
+  }
+  w.innerHTML=`<h2>Ton prof particulier pour <em>tous</em> tes cours d'ingé.</h2>
+  <p class="lead">Importe un cours (PDF, Word, photos de tes notes) pour qu'il soit expliqué de A à Z, ou parle-moi directement de n'importe quelle matière. Envoie la photo d'un exercice : je recopie l'énoncé et je le résous étape par étape.</p>
+  <div class="examples-label">Exemples pour démarrer</div>`;
+  const g=document.createElement("div");g.className="cards";
+  [["Comprendre","Séries de Fourier","Explique-moi les séries de Fourier : intuition, coefficients, convergence, avec un exemple sur un signal créneau.","explain"],
+   ["Exercice","Résoudre une EDO","Résous y'' + 4y' + 13y = 0 avec y(0)=1 et y'(0)=0, puis interprète physiquement la solution.","exo"],
+   ["Comprendre","Résistance des matériaux","Explique la flexion simple d'une poutre : moment fléchissant, contrainte normale, et un exemple chiffré de poutre sur deux appuis.","explain"],
+   ["Réviser","Thermodynamique","Fais-moi une fiche de révision sur les cycles thermodynamiques (Carnot, Rankine, Otto) avec les rendements.","revise"]].forEach(([k,t,p,m])=>{
+    const b=document.createElement("button");b.className="card";b.innerHTML=`<span class="k">${k}</span><b>${t}</b><span>${esc(p)}</span>`;
+    b.onclick=()=>{setMode(m);send(p)};g.appendChild(b)});
+  w.appendChild(g);
+  const row=document.createElement("div");row.className="followups";
+  const b1=document.createElement("button");b1.className="btn primary";b1.textContent="Importer un cours";b1.onclick=openCourseModal;
+  const b2=document.createElement("button");b2.className="btn";b2.textContent="Photographier un exercice";b2.onclick=()=>{setMode("exo");$("#photoInput").click()};
+  row.append(b1,b2);w.appendChild(row);
+  return w;
+}
+function scrollDown(smooth){const t=$("#thread");if(smooth&&t.scrollTo)t.scrollTo({top:t.scrollHeight,behavior:"smooth"});else t.scrollTop=t.scrollHeight}
+
+/* ---------- actions ---------- */
+function setMode(m){S.mode=m;const c=getChat();if(c){c.mode=m}renderTop()}
+function newChat(){S.chatId=null;S.pending=[];renderAttach();renderTop();renderThread();renderRail();closeDrawer()}
+function openChat(id){
+  const c=S.chats.find(x=>x.id===id);if(!c)return;
+  if(S.busy)stop();
+  S.chatId=id;S.courseId=c.courseId||null;S.mode=c.mode||"explain";
+  renderTop();renderThread();renderRail();closeDrawer();
+}
+function openCourse(id){
+  if(S.busy)stop();
+  S.courseId=id;S.chatId=null;renderTop();renderThread();renderRail();closeDrawer();
+}
+function ensureChat(firstText){
+  let c=getChat();
+  if(!c){
+    const course=S.courseId?getCourse(S.courseId):null;
+    let t=firstText.replace(/\s+/g," ").trim();if(t.length>48)t=t.slice(0,46)+"…";
+    c={id:"chat_"+uid(),kind:"chat",title:(course&&!course.example?course.title+" · ":"")+(t||"Exercice en photo"),courseId:S.courseId,mode:S.mode,messages:[],createdAt:Date.now(),updatedAt:Date.now()};
+    S.chats.unshift(c);S.chatId=c.id;
+  }
+  return c;
+}
+function persistChat(c){
+  c.updatedAt=Date.now();
+  const clean={...c,messages:c.messages.map(({thumbs,...m})=>m)};delete clean._live;
+  while(bytes(JSON.stringify(clean))>230000&&clean.messages.length>4)clean.messages.splice(0,2);
+  if(!clean.courseId)clean.courseId=null;
+  if(clean.courseId==="example")clean.courseId="example";
+  Store.save(clean);
+}
+
+async function send(text,opts={}){
+  text=(text??$("#input").value).trim();
+  const imgs=opts.noImages?[]:S.pending.slice();
+  if(!text&&!imgs.length)return;
+  if(S.busy)return;
+  const sample=await getSample();
+  if(!sample){notice("Cette page n'a pas accès à Claude ici. Ouvre-la sur claude.ai en étant connecté.");return}
+  if(imgs.length&&!(S.limits&&S.limits.images)){notice("L'envoi de photos n'est pas disponible dans cette vue. Recopie l'énoncé en texte.");return}
+  const display=opts.display||text||"Résous cet exercice.";
+  const content=text||(S.mode==="exo"?"Voici la photo d'un exercice : recopie l'énoncé puis résous-le entièrement.":"Explique le contenu de cette image.");
+  const chat=ensureChat(display);
+  chat.mode=S.mode;
+  const prevAI=[...chat.messages].reverse().find(m=>m.role==="assistant");
+  const answeringVerify=!!(prevAI&&prevAI.verify&&chat.messages[chat.messages.length-1]===prevAI);
+  const verifyStep=imgs.length>0&&S.mode==="exo"&&$("#verifyToggle").checked;
+  let finalContent=opts.prompt||content;
+  if(verifyStep){
+    finalContent=(text?"Message de l'étudiant : "+text+"\n\n":"")+`Voici la photo d'un exercice. ÉTAPE 1 SEULEMENT, NE RÉSOUS PAS ENCORE.
+1. Section **Énoncé** : recopie l'énoncé intégralement et fidèlement (toutes les questions), formules en LaTeX.
+2. S'il y a un schéma (circuit électrique/électronique, système mécanique, diagramme…), section **Schéma** : décris-le précisément.
+   - Pour un circuit : un tableau « Composant | Valeur | Branché entre les nœuds » (nomme les nœuds A, B, C… et la masse), puis les sources avec leur sens/polarité, et le sens des courants et tensions fléchés.
+   - Pour un autre schéma : éléments, liaisons, cotes, efforts, orientations.
+3. Section **Points à confirmer** : liste tout ce qui est incertain à la lecture (valeur peu lisible, connexion ambiguë, notation). S'il n'y a rien, écris « Aucun ».
+4. Termine par la question : « Est-ce bien ton exercice ? Corrige-moi si quelque chose est faux. »`;
+  }else if(answeringVerify&&!opts.prompt&&!/^C'est correct\./.test(text)){
+    finalContent=text+"\n\n(Corrections de l'étudiant sur la description. Prends-les en compte, rappelle brièvement la description corrigée, puis résous l'exercice complet.)";
+  }
+  const um={role:"user",content:finalContent,display,ts:Date.now()};
+  if(imgs.length){um.imgs=imgs.length;um.thumbs=imgs.map(x=>x.url);IMGS[chat.id]=imgs.map(x=>x.blob)}
+  chat.messages.push(um);
+  $("#input").value="";autosize();S.pending=[];renderAttach();
+  renderTop();renderRail();
+  if($("#col").querySelector(".msg")){prepThread();$("#col").appendChild(bubbleUser(um))}else renderThread();
+  S.stick=true;scrollDown(true);
+  let blobs=imgs.map(x=>x.blob);
+  if(!blobs.length&&answeringVerify&&IMGS[chat.id])blobs=IMGS[chat.id];
+  await run(chat,blobs,{verify:verifyStep,afterVerify:answeringVerify});
+}
+async function run(chat,images,flags={}){
+  const course=chat.courseId?getCourse(chat.courseId):null;
+  const calcOn=!flags.verify&&chat.mode!=="explain"&&$("#calcToggle").checked&&!!window.math&&!!(S.limits&&S.limits.tools);
+  const turns=buildTurns(chat,course,null,{calc:calcOn,afterVerify:flags.afterVerify});
+  const am={role:"assistant",content:"",ts:Date.now()};if(flags.verify)am.verify=true;chat.messages.push(am);chat._live=true;
+  if(!$("#col").querySelector(".msg"))renderThread();else prepThread();
+  let node=bubbleAI({role:"assistant",content:""},0,false);$("#col").appendChild(node);
+  const md=node.querySelector(".md");
+  md.innerHTML='<p class="thinking">Réflexion en cours…</p>';
+  node.querySelector(".msg-tools").hidden=true;
+  S.stick=true;scrollDown();
+  setBusy(true);
+  const ctl=new AbortController();S.ctl=ctl;
+  let last=0,pend=null;
+  const paint=()=>{paintBlocks(md,am.content,false);if(S.stick)scrollDown()};
+  try{
+    const o={signal:ctl.signal,cache:false,modelTier:$("#deepToggle").checked?"complex":"default",
+      onText:({text})=>{am.content=text;const now=Date.now();if(now-last>90){last=now;paint()}else{clearTimeout(pend);pend=setTimeout(paint,100)}}};
+    if(images&&images.length)o.images=images.slice(0,S.limits.images.maxCount);
+    if(calcOn){
+      const st=document.createElement("div");st.className="calc-status";node.querySelector(".bubble").appendChild(st);
+      o.tools=[calcTool(n=>{am.calcs=(am.calcs||0)+n;st.textContent="Calculatrice : "+am.calcs+" calcul(s) effectué(s)"})];
+    }
+    const r=await S.sample(turns,o);
+    am.content=r.text;
+    if(r.truncated)am.error="Réponse coupée car trop longue : clique sur « Continue ».";
+  }catch(e){
+    if(e&&e.code==="cancelled"){am.content=(e.text||am.content||"")}
+    else if(e&&e.code==="refused"){am.content="";am.error=errText(e)}
+    else{am.content=e&&e.text||am.content||"";am.error=errText(e);if(e&&e.code==="not_granted")notice(errText(e))}
+  }finally{
+    clearTimeout(pend);
+    S.ctl=null;setBusy(false);delete chat._live;
+    if(!am.content&&!am.error)am.error="Réponse interrompue.";
+    persistChat(chat);
+    const idx=chat.messages.indexOf(am);
+    const fresh=bubbleAI(am,idx,true);
+    if(node.isConnected)node.replaceWith(fresh);else renderThread();
+    S.sig=sigOf(chat);
+    renderRail();
+  }
+}
+function regenerate(){
+  const c=getChat();if(!c||S.busy)return;
+  if(c.messages.length&&c.messages[c.messages.length-1].role==="assistant"){c.messages.pop();const ais=$("#col").querySelectorAll(".msg.ai");if(ais.length)ais[ais.length-1].remove()}
+  const lastUser=c.messages[c.messages.length-1];
+  const imgs=lastUser&&lastUser.imgs&&IMGS[c.id]?IMGS[c.id]:[];
+  const before=c.messages.slice(0,-1).reverse().find(m=>m.role==="assistant");
+  run(c,imgs,{verify:!!(lastUser&&lastUser.imgs&&/ÉTAPE 1 SEULEMENT/.test(lastUser.content)),afterVerify:!!(before&&before.verify)});
+}
+function stop(){if(S.ctl)S.ctl.abort()}
+function setBusy(b){S.busy=b;$("#sendBtn").hidden=b;$("#stopBtn").hidden=!b}
+
+function courseAction(k){
+  const c=getCourse(S.courseId);if(!c)return;
+  if(k==="detach"){S.courseId=null;const ch=getChat();if(ch){ch.courseId=null;persistChat(ch)}renderTop();renderThread();renderRail();return}
+  if(k==="quiz"){openQuiz(c);return}
+  const P={
+    full:["explain","Explique tout le cours","Explique-moi TOUT ce cours de façon complète et pédagogique, section par section, dans l'ordre du cours. Pour chaque section : l'intuition, les définitions et résultats clés (avec leurs hypothèses), au moins un exemple entièrement déroulé, et une application en ingénierie. Si le cours est long, traite la première moitié de façon approfondie et termine par « Dis « Continue » pour la suite » en indiquant où tu t'es arrêté."],
+    plan:["explain","Plan & notions clés","Donne-moi le plan détaillé de ce cours, puis la liste des notions clés avec pour chacune une explication en 2-3 phrases, et les liens logiques entre elles (quelle notion sert à quoi)."],
+    fiche:["revise","Fiche de révision","Fais-moi une fiche de révision complète de ce cours : définitions essentielles, théorèmes et formules (en LaTeX), méthodes types sous forme d'étapes, et les erreurs à éviter. Format compact et hiérarchisé."],
+    formules:["revise","Formulaire","Rédige le formulaire complet de ce cours : toutes les formules importantes en LaTeX, regroupées par thème, avec pour chacune la signification des variables, les unités et les conditions d'application."],
+    exos:["revise","Exercices corrigés","Propose-moi 5 exercices sur ce cours, de difficulté croissante (du calcul direct à un problème type examen d'école d'ingénieur avec contexte industriel). Donne d'abord tous les énoncés, puis une section « Corrigés » avec des solutions détaillées étape par étape."],
+    pieges:["revise","Pièges classiques","Quels sont les pièges, confusions et erreurs classiques des étudiants sur ce cours ? Pour chacun : l'erreur, pourquoi elle est tentante, la bonne façon de faire, et un mini-exemple."]
+  }[k];
+  setMode(P[0]);
+  send(P[2],{display:P[1],noImages:true});
+}
+
+/* ---------- attachments ---------- */
+async function addImages(files){
+  const list=[...files].filter(f=>f.type.startsWith("image/"));
+  if(!list.length)return;
+  const sample=await getSample();
+  const max=S.limits&&S.limits.images?S.limits.images.maxCount:5;
+  for(const f of list){
+    if(S.pending.length>=max){toast(`Maximum ${max} images par message.`);break}
+    const blob=await shrink(f);
+    S.pending.push({blob,url:await thumb(blob)});
+  }
+  if(S.mode==="explain"&&!getChat())setMode("exo");
+  renderAttach();
+}
+function renderAttach(){
+  const r=$("#attachRow");r.innerHTML="";
+  S.pending.forEach((p,i)=>{const d=document.createElement("div");d.className="att";d.innerHTML=`<img alt="Image jointe" src="${p.url}"><button aria-label="Retirer">×</button>`;d.querySelector("button").onclick=()=>{S.pending.splice(i,1);renderAttach()};r.appendChild(d)});
+}
+function loadImg(blob){return new Promise((res,rej)=>{const u=URL.createObjectURL(blob);const i=new Image();i.onload=()=>{res(i)};i.onerror=rej;i.src=u})}
+async function shrink(file,maxSide=2000){
+  try{
+    const img=await loadImg(file);const sc=Math.min(1,maxSide/Math.max(img.width,img.height));
+    if(sc===1&&file.size<3.5e6&&/jpe?g|png|webp/.test(file.type))return file;
+    const c=document.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(r,"image/jpeg",.88));
+  }catch(e){return file}
+}
+async function thumb(blob){
+  try{const img=await loadImg(blob);const s=120/Math.max(img.width,img.height);const c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.7)}catch(e){return ""}
+}
+
+/* ---------- course import ---------- */
+async function pdfToText(file,onp){
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer(),disableWorker:true,isEvalSupported:false}).promise;
+  let out=[];let sparse=[];
+  for(let i=1;i<=pdf.numPages;i++){
+    const pg=await pdf.getPage(i);const tc=await pg.getTextContent();
+    let line="",txt="";let lastY=null;
+    tc.items.forEach(it=>{const y=it.transform[5];if(lastY!==null&&Math.abs(y-lastY)>2){txt+=line+"\n";line=""}line+=it.str;lastY=y});txt+=line;
+    if(txt.replace(/\s/g,"").length<40)sparse.push(i);
+    out.push(`--- Page ${i} ---\n${txt.trim()}`);
+    onp&&onp(i/pdf.numPages*.5);
+  }
+  return {pdf,pages:out,sparse,num:pdf.numPages};
+}
+async function renderPdfPage(pdf,n){
+  const pg=await pdf.getPage(n);const v=pg.getViewport({scale:1});const sc=Math.min(2,1600/Math.max(v.width,v.height));const vp=pg.getViewport({scale:sc});
+  const c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);
+  await pg.render({canvasContext:ctx,viewport:vp}).promise;
+  return await new Promise(r=>c.toBlob(r,"image/jpeg",.85));
+}
+async function transcribe(blobs,label){
+  const sample=await getSample();
+  if(!sample||!S.limits||!S.limits.images)throw {code:"images_unavailable"};
+  const r=await sample(`Voici ${blobs.length} page(s) d'un cours d'école d'ingénieur (${label}). Transcris FIDÈLEMENT tout le contenu en Markdown, dans l'ordre, sans résumer ni commenter : titres, texte, définitions, théorèmes, exemples, exercices. Toutes les formules en LaTeX ($...$ ou $$...$$). Pour une figure ou un schéma, écris [Figure : description précise de ce qu'elle montre, avec les grandeurs et légendes]. Si un passage est illisible, écris [illisible]. Réponds uniquement avec la transcription.`,{images:blobs,modelTier:"default"});
+  return r.text;
+}
+function openCourseModal(){
+  closeDrawer();
+  const root=$("#modalRoot");
+  root.innerHTML=`<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="cmT">
+    <h3 id="cmT">Ajouter un cours</h3>
+    <p class="sub">PDF, Word (.docx), texte, ou photos de tes notes. Les pages scannées ou photographiées sont transcrites automatiquement. Tu peux aussi juste donner le nom du cours.</p>
+    <div class="field"><label for="cTitle">Nom du cours</label><input id="cTitle" placeholder="Ex : Mécanique des fluides — chapitre 3"></div>
+    <div class="field"><label for="cSubject">Matière (facultatif)</label><input id="cSubject" placeholder="Ex : Mécanique, Signal, Électronique de puissance…"></div>
+    <div class="drop" id="drop" tabindex="0" role="button"><b>Déposer des fichiers ou cliquer pour choisir</b>PDF · DOCX · TXT · MD · photos (JPEG/PNG)</div>
+    <input type="file" id="cFiles" multiple hidden accept=".pdf,.docx,.txt,.md,.tex,.csv,.py,.m,.c,.java,image/*">
+    <div class="filelist" id="flist"></div>
+    <div class="field" style="margin-top:12px"><label for="cText">Ou colle le contenu du cours / tes notes</label><textarea id="cText" placeholder="Colle ici le texte du cours, ou décris ce que couvre le chapitre si tu n'as pas le support."></textarea></div>
+    <div class="modal-foot"><div class="progress" id="prog"></div><button class="btn" id="cCancel">Annuler</button><button class="btn primary" id="cSave">Ajouter le cours</button></div>
+  </div></div>`;
+  let files=[];
+  const fl=$("#flist"),drop=$("#drop"),fi=$("#cFiles");
+  const showFiles=()=>{fl.innerHTML=files.map((f,i)=>`<div><span>${esc(f.name)}</span><span>${(f.size/1024/1024).toFixed(1)} Mo</span></div>`).join("");if(files.length&&!$("#cTitle").value)$("#cTitle").value=files[0].name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")};
+  drop.onclick=()=>fi.click();drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};
+  fi.onchange=()=>{files=files.concat([...fi.files]);fi.value="";showFiles()};
+  ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("drag")}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("drag")}));
+  drop.addEventListener("drop",e=>{files=files.concat([...e.dataTransfer.files]);showFiles()});
+  let cancelled=false;
+  $("#cCancel").onclick=()=>{cancelled=true;root.innerHTML=""};
+  $("#ov").onclick=e=>{if(e.target.id==="ov"&&!$("#cSave").disabled)root.innerHTML=""};
+  $("#cSave").onclick=async()=>{
+    const title=$("#cTitle").value.trim()||"Cours sans titre";
+    const btn=$("#cSave");btn.disabled=true;
+    const prog=$("#prog");const setP=(t,p)=>{prog.innerHTML=esc(t)+(p!=null?`<div class="bar"><i style="width:${Math.round(p*100)}%"></i></div>`:"")};
+    try{
+      let parts=[];let notes="";
+      const pasted=$("#cText").value.trim();
+      const imgFiles=files.filter(f=>f.type.startsWith("image/"));
+      for(const f of files){
+        if(cancelled)return;
+        const n=f.name.toLowerCase();
+        if(n.endsWith(".pdf")){
+          setP("Lecture de "+f.name+"…",0);
+          const r=await pdfToText(f,p=>setP("Lecture de "+f.name+"…",p));
+          if(r.sparse.length){
+            const todo=r.sparse.slice(0,40);
+            const per=Math.max(1,Math.min(S.limits&&S.limits.images?S.limits.images.maxCount:0,5));
+            if(!(await getSample())||!S.limits||!S.limits.images){notes+=` (${r.sparse.length} page(s) scannée(s) non lues)`}
+            else for(let i=0;i<todo.length;i+=per){
+              if(cancelled)return;
+              const batch=todo.slice(i,i+per);
+              setP(`Transcription des pages scannées ${batch[0]}–${batch[batch.length-1]} sur ${r.num}…`,.5+.5*i/todo.length);
+              const blobs=[];for(const p of batch)blobs.push(await renderPdfPage(r.pdf,p));
+              const t=await transcribe(blobs,f.name+", pages "+batch.join(", "));
+              batch.forEach((p,j)=>{const idx=p-1;r.pages[idx]=`--- Page ${p} ---\n`+(j===0?t:"")});
+            }
+          }
+          parts.push(`## Fichier : ${f.name}\n\n`+r.pages.join("\n\n"));
+        }else if(n.endsWith(".docx")){
+          setP("Lecture de "+f.name+"…",null);
+          const r=await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()});
+          parts.push(`## Fichier : ${f.name}\n\n`+r.value);
+        }else if(!f.type.startsWith("image/")){
+          parts.push(`## Fichier : ${f.name}\n\n`+await f.text());
+        }
+      }
+      if(imgFiles.length){
+        if(!(await getSample())||!S.limits||!S.limits.images)throw {code:"images_unavailable"};
+        const per=Math.max(1,Math.min(S.limits.images.maxCount,5));
+        for(let i=0;i<imgFiles.length;i+=per){
+          if(cancelled)return;
+          setP(`Transcription des photos ${i+1}–${Math.min(i+per,imgFiles.length)} sur ${imgFiles.length}…`,i/imgFiles.length);
+          const blobs=[];for(const f of imgFiles.slice(i,i+per))blobs.push(await shrink(f));
+          parts.push(await transcribe(blobs,"photos de notes"));
+        }
+      }
+      if(pasted)parts.push(pasted);
+      let text=parts.join("\n\n").replace(/\n{3,}/g,"\n\n").trim();
+      let cut=false;
+      while(bytes(text)>200000){text=text.slice(0,Math.floor(text.length*.9));cut=true}
+      const isTopic=!files.length&&pasted&&pasted.length<400;
+      const course={id:"course_"+uid(),kind:"course",title,subject:$("#cSubject").value.trim(),text:isTopic?"":text,notes:isTopic?pasted:"",source:files.map(f=>f.name).join(", ")||(isTopic?"Sujet":"Texte collé"),createdAt:Date.now()};
+      Store.save(course);S.courses.unshift(course);
+      root.innerHTML="";
+      if(cut)toast("Cours très long : seule la première partie a été gardée. Importe-le en plusieurs chapitres.");
+      else toast("Cours ajouté"+notes);
+      openCourse(course.id);
+    }catch(e){
+      btn.disabled=false;
+      setP(e&&e.code?errText(e):"Impossible de lire ce fichier. Essaie un autre format (PDF, DOCX ou texte).",null);
+    }
+  };
+  setTimeout(()=>$("#cTitle").focus(),50);
+}
+
+/* ---------- quiz ---------- */
+async function openQuiz(course){
+  const root=$("#modalRoot");
+  root.innerHTML=`<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="qzT" style="width:min(760px,100%)">
+    <h3 id="qzT">QCM · ${esc(course.title)}</h3><p class="sub" id="qzSub">Préparation de 10 questions…</p><div class="quiz md" id="qz"><p class="thinking">Génération du QCM…</p></div>
+    <div class="modal-foot"><span class="score progress" id="qzScore"></span><button class="btn" id="qzNew">Nouveau QCM</button><button class="btn primary" id="qzClose">Fermer</button></div></div></div>`;
+  $("#qzClose").onclick=()=>root.innerHTML="";
+  $("#ov").onclick=e=>{if(e.target.id==="ov")root.innerHTML=""};
+  $("#qzNew").onclick=()=>openQuiz(course);
+  const sample=await getSample();
+  if(!sample){$("#qz").innerHTML=`<div class="err">Claude n'est pas accessible ici.</div>`;return}
+  const ctx=course.text?`Cours :\n<cours>\n${course.text.slice(0,180000)}\n</cours>`:`Sujet : « ${course.title} » ${course.subject||""} ${course.notes||""} (niveau école d'ingénieur).`;
+  try{
+    const q=await sample.json(`Tu es professeur en école d'ingénieur. Crée un QCM de 10 questions en français pour vérifier la compréhension de ce cours : mélange questions de cours, calculs courts et pièges classiques, difficulté croissante. Maths en LaTeX avec $...$. 4 choix par question, une seule bonne réponse, position de la bonne réponse variée.
+${ctx}
+Réponds UNIQUEMENT avec du JSON : {"questions":[{"q":"énoncé","choices":["A","B","C","D"],"answer":0,"explanation":"pourquoi c'est la bonne réponse et pourquoi les autres sont fausses"}]}`,{modelTier:"default",cache:false});
+    const qs=(q&&q.questions||[]).filter(x=>x&&x.q&&Array.isArray(x.choices));
+    if(!qs.length)throw {code:"empty_completion"};
+    let done=0,good=0;
+    const box=$("#qz");box.innerHTML="";$("#qzSub").textContent="Clique sur une réponse pour voir la correction.";
+    qs.forEach((x,i)=>{
+      const d=document.createElement("div");d.className="q";
+      d.innerHTML=`<div class="q-h"><span class="n">${String(i+1).padStart(2,"0")}</span><span>${renderMD(x.q).replace(/^<p>|<\/p>\s*$/g,"")}</span></div><div class="opts"></div>`;
+      const o=d.querySelector(".opts");
+      x.choices.forEach((c,j)=>{const b=document.createElement("button");b.className="opt";b.innerHTML=renderMD(String.fromCharCode(65+j)+". "+c).replace(/^<p>|<\/p>\s*$/g,"");
+        b.onclick=()=>{o.querySelectorAll("button").forEach((bb,k)=>{bb.disabled=true;if(k===x.answer)bb.classList.add("good")});if(j!==x.answer)b.classList.add("wrong");else good++;done++;
+          const ex=document.createElement("div");ex.className="expl";ex.innerHTML=renderMD(x.explanation||"");d.appendChild(ex);typeset(ex);
+          $("#qzScore").textContent=`Score : ${good} / ${done}`+(done===qs.length?(good/qs.length>=.8?" · très bien":good/qs.length>=.5?" · à consolider":" · revois le cours"):"")};
+        o.appendChild(b)});
+      box.appendChild(d);
+    });
+    typeset(box);
+  }catch(e){$("#qz").innerHTML=`<div class="err">${esc(e&&e.code==="invalid_json"?"Le QCM n'a pas pu être généré correctement. Clique sur « Nouveau QCM ».":errText(e))}</div>`}
+}
+
+/* ---------- misc ui ---------- */
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}
+function notice(t){$("#noticeBox").innerHTML=`<div class="notice">${esc(t)}</div>`;setTimeout(()=>{$("#noticeBox").innerHTML=""},9000)}
+function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast("Copié"),()=>toast("Copie impossible ici"))}catch(e){toast("Copie impossible ici")}}
+function confirmBox(msg,yes){
+  const root=$("#modalRoot");
+  root.innerHTML=`<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" style="width:min(420px,100%)"><h3>${esc(msg)}</h3><p class="sub">Cette action est définitive.</p><div class="modal-foot"><button class="btn" id="cN">Annuler</button><button class="btn primary" id="cY">Supprimer</button></div></div></div>`;
+  $("#cN").onclick=()=>root.innerHTML="";$("#cY").onclick=()=>{root.innerHTML="";yes()};
+}
+function autosize(){const t=$("#input");t.style.height="auto";t.style.height=Math.min(220,t.scrollHeight)+"px"}
+function closeDrawer(){$("#app").classList.remove("open")}
+
+$("#input").addEventListener("input",autosize);
+$("#input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}});
+$("#input").addEventListener("paste",e=>{const f=[...(e.clipboardData&&e.clipboardData.files||[])].filter(x=>x.type.startsWith("image/"));if(f.length){e.preventDefault();addImages(f)}});
+$("#sendBtn").onclick=()=>send();
+$("#thread").addEventListener("scroll",()=>{const t=$("#thread");const d=t.scrollHeight-t.scrollTop-t.clientHeight;S.stick=d<80;$("#toBottom").hidden=d<300},{passive:true});
+$("#toBottom").onclick=()=>{S.stick=true;scrollDown(true)};
+$("#stopBtn").onclick=stop;
+$("#photoBtn").onclick=()=>$("#photoInput").click();
+$("#photoInput").onchange=e=>{addImages(e.target.files);e.target.value=""};
+$("#newChatBtn").onclick=newChat;
+$("#addCourseBtn").onclick=openCourseModal;
+$("#menuBtn").onclick=()=>$("#app").classList.add("open");
+$("#scrim").onclick=closeDrawer;
+document.querySelectorAll("#modeSeg button").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+const cb=$("#compBox");
+["dragover","dragenter"].forEach(ev=>cb.addEventListener(ev,e=>{e.preventDefault();cb.classList.add("drag")}));
+["dragleave","drop"].forEach(ev=>cb.addEventListener(ev,e=>{e.preventDefault();cb.classList.remove("drag")}));
+cb.addEventListener("drop",e=>addImages(e.dataTransfer.files));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#modalRoot").innerHTML&&!document.querySelector("#cSave:disabled"))$("#modalRoot").innerHTML=""});
+
+S.courseId=null;
+renderRail();renderTop();renderThread();
+Store.init();
+getSample();
+})();
+</script>
